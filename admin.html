@@ -348,10 +348,18 @@
     .divider { border: none; border-top: 1px solid var(--line); margin: 24px 0; }
 
     /* ── Responsive ───────────────────────────────────────────────── */
-    @media (max-width: 780px) {
-      .main { grid-template-columns: 1fr; }
-      .sidebar { display: none; }
-    }
+    
+.menu-toggle{display:none;width:42px;height:42px;border:none;background:none;font-size:28px;cursor:pointer}
+.sidebar-overlay{display:none}
+@media (max-width:780px){
+.menu-toggle{display:block}
+.main{display:block}
+.sidebar{position:fixed;top:62px;left:-260px;width:240px;height:calc(100vh - 62px);display:block;transition:left .3s;z-index:1000}
+.sidebar.open{left:0}
+.sidebar-overlay{position:fixed;inset:62px 0 0 0;background:rgba(0,0,0,.35);display:none;z-index:999}
+.sidebar-overlay.show{display:block}
+}
+
   </style>
 </head>
 <body>
@@ -382,6 +390,7 @@
 
   <!-- Top bar -->
   <header class="topbar">
+    <button id="menuToggle" class="menu-toggle">☰</button>
     <div class="topbar-brand"><span>COSTA</span> VIA</div>
     <div class="topbar-right">
       <span id="syncBadge" class="sync-badge badge-saving">🔄 Connexion à JSONbin...</span>
@@ -393,7 +402,7 @@
   <div class="main">
 
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <p class="sidebar-section-label">Navigation</p>
       <ul class="sidebar-nav">
         <li><a class="active" data-tab="lines">
@@ -413,6 +422,8 @@
         </a></li>
       </ul>
     </aside>
+
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
     <!-- Content -->
     <div class="content">
@@ -983,6 +994,14 @@ function toast(msg, type = '') {
   el.className = 'show ' + type;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { el.className = ''; }, 2800);
+}
+const menuBtn=document.getElementById("menuToggle");
+const sidebar=document.getElementById("sidebar");
+const overlay=document.getElementById("sidebarOverlay");
+if(menuBtn){
+menuBtn.onclick=()=>{sidebar.classList.toggle("open");overlay.classList.toggle("show");};
+overlay.onclick=()=>{sidebar.classList.remove("open");overlay.classList.remove("show");};
+document.querySelectorAll(".sidebar [data-tab]").forEach(a=>a.onclick=()=>{sidebar.classList.remove("open");overlay.classList.remove("show");});
 }
 </script>
 </body>
