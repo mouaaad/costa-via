@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Voyagez entre Kénitra et Nador en tout confort. Réservez votre place sur Costa Via en quelques secondes — confirmation WhatsApp immédiate."
+    />
+    <title>Costa Via | Kénitra ↔ Nador</title>
+
+    <!-- Elegant font pairing: Cormorant Garamond (display) + Inter (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="styles.css" />
+
+    <style>
+      /* ── Typography overrides ─────────────────────────────────── */
+      :root {
+        --font-display: 'Cormorant Garamond', Georgia, serif;
+        --font-body:    'Inter', system-ui, sans-serif;
+        --gold:  #b8934a;
+        --gold-light: #d4b06a;
+        --navy:  #0f1e2e;
+      }
+
+      /* Force body to use Inter */
+      body { font-family: var(--font-body); }
+
+      /* ── Logo: upright, not italic ───────────────────────────── */
+      .costa-logo {
+        font-family: var(--font-display) !important;
+        font-style: normal !important;   /* removes any italic */
+        font-weight: 600;
+        letter-spacing: 0.18em;
+      }
+      .costa-word {
+        font-style: normal !important;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+      }
+      /* via-row: perfect centred flex row */
+      .via-row {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0 !important;
+        width: 100% !important;
+      }
+      .via-row small {
+        font-style: normal !important;
+        font-family: var(--font-body) !important;
+        font-weight: 300;
+        font-size: 0.6em;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        /* <small> has browser default font-size: smaller — reset it */
+        font-size: 0.55em !important;
+        line-height: 1 !important;
+        display: inline-block !important;
+        vertical-align: middle !important;
+      }
+      /* Gold accent on logo lines — equal flex so they share remaining space symmetrically */
+      .via-line {
+        background: var(--gold) !important;
+        flex: 1 1 0 !important;
+        height: 1px !important;
+        display: block !important;
+      }
+      .via-line.left  { margin-right: 6px !important; }
+      .via-line.right { margin-left:  6px !important; }
+
+      /* Brand link in header */
+      .brand .brand-logo {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 3px !important;
+        min-width: 80px !important;   /* gives via-row a fixed width so lines are truly equal */
+      }
+
+      /* ── Nav links – clean Inter ─────────────────────────────── */
+      .nav-links a, .header-action {
+        font-family: var(--font-body);
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        font-style: normal !important;
+      }
+
+      /* ── Hero headings ───────────────────────────────────────── */
+      .hero-content h1 {
+        font-family: var(--font-display);
+        font-style: normal !important;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+      }
+      .hero-copy {
+        font-family: var(--font-body);
+        font-weight: 300;
+        font-size: 1.15rem;
+        line-height: 1.75;
+        font-style: normal !important;
+      }
+
+      /* ── Section headings ────────────────────────────────────── */
+      h2 {
+        font-family: var(--font-display) !important;
+        font-style: normal !important;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+      .eyebrow {
+        font-family: var(--font-body) !important;
+        font-style: normal !important;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: var(--gold);
+      }
+
+      /* ── Route card: refined shape ───────────────────────────── */
+      .route-card {
+        border-radius: 6px !important;        /* subtle, not round */
+        border-left: 3px solid var(--gold) !important;
+        padding: 1.4rem 1.8rem !important;
+        font-family: var(--font-body) !important;
+        font-style: normal !important;
+        position: relative;
+        overflow: hidden;
+      }
+      .route-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(184,147,74,0.06) 0%, transparent 60%);
+        pointer-events: none;
+      }
+      .route-name {
+        font-family: var(--font-display) !important;
+        font-style: normal !important;
+        font-weight: 600;
+        font-size: 1.3rem;
+        letter-spacing: 0.04em;
+      }
+      .route-meta {
+        font-family: var(--font-body) !important;
+        font-style: normal !important;
+        font-weight: 400;
+        font-size: 0.82rem;
+        letter-spacing: 0.03em;
+        opacity: 0.7;
+      }
+
+      /* ── Fleet section text ──────────────────────────────────── */
+      .fleet-content p,
+      .fleet-content li {
+        font-family: var(--font-body) !important;
+        font-style: normal !important;
+        font-weight: 400;
+        line-height: 1.75;
+      }
+
+      /* ── Reservation form: card shape ────────────────────────── */
+      .reservation-form {
+        border-radius: 6px !important;
+        border-top: 3px solid var(--gold) !important;
+      }
+      .reservation-form label {
+        font-family: var(--font-body) !important;
+        font-style: normal !important;
+        font-weight: 500;
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .reservation-form input,
+      .reservation-form select,
+      .reservation-form textarea {
+        font-family: var(--font-body) !important;
+        font-style: normal !important;
+        font-weight: 400;
+        border-radius: 4px !important;
+      }
+
+      .reservation-copy h2 { font-style: normal !important; }
+      .reservation-copy p {
+        font-family: var(--font-body) !important;
+        font-style: normal !important;
+        font-weight: 400;
+        line-height: 1.75;
+      }
+
+      /* ── Loader logo ─────────────────────────────────────────── */
+      .loader-fallback .costa-word,
+      .loader-fallback small {
+        font-style: normal !important;
+      }
+
+      /* ── Ride transition: 0.5 s instead of 1 s ─────────────────── */
+      .ride-transition {
+        animation-duration: 0.5s !important;
+        transition-duration: 0.5s !important;
+      }
+      .ride-transition * {
+        animation-duration: 0.5s !important;
+        transition-duration: 0.5s !important;
+      }
+      /* also target any keyframe-based animation on the bus elements */
+      .animated-bus {
+        animation-duration: 0.5s !important;
+      }
+      .road-line {
+        animation-duration: 0.5s !important;
+      }
+
+      /* ── Route card: pointer + hover lift ──────────────────────── */
+      .route-card {
+        cursor: pointer !important;
+        transition: transform 0.18s ease, box-shadow 0.18s ease !important;
+      }
+      .route-card:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 6px 20px rgba(184,147,74,0.18) !important;
+      }
+      .route-card:active {
+        transform: translateY(0px) !important;
+      }
+
+      /* ── Route card departure pills ──────────────────────────── */
+      .route-deps {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 12px;
+      }
+      .route-dep-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        border-radius: 99px;
+        background: rgba(184,147,74,0.08);
+        border: 1px solid rgba(184,147,74,0.25);
+        font-size: 11px;
+        font-weight: 500;
+        color: #7a5e1e;
+        font-family: var(--font-body) !important;
+        font-style: normal !important;
+      }
+
+      /* ── Route grid dynamique ────────────────────────────────── */
+      #routeGrid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+      }
+
+      /* Skeleton pendant le chargement */
+      .route-card-skeleton {
+        min-height: 130px;
+        border-radius: 8px;
+        background: linear-gradient(90deg, #ece9e2 25%, #f5f3ef 50%, #ece9e2 75%);
+        background-size: 200% 100%;
+        animation: skeleton-shimmer 1.4s ease infinite;
+      }
+      @keyframes skeleton-shimmer {
+        0%   { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+
+      /* ── Time boxes ───────────────────────────────────────────── */
+      .time-boxes-label {
+        display: block;
+        font-family: var(--font-body) !important;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink);
+        margin-bottom: 10px;
+      }
+
+      .time-boxes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .time-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        min-width: 88px;
+        padding: 12px 16px;
+        border: 1.5px solid var(--line, #dedbd5);
+        border-radius: 10px;
+        background: #fff;
+        cursor: pointer;
+        transition: border-color 0.15s, background 0.15s, transform 0.15s, box-shadow 0.15s;
+        font-family: var(--font-body) !important;
+        font-style: normal !important;
+        text-align: center;
+        user-select: none;
+      }
+
+      .time-box:hover {
+        border-color: var(--gold, #b8934a);
+        background: #fdf8f0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(184,147,74,0.15);
+      }
+
+      .time-box.selected {
+        border-color: var(--gold, #b8934a);
+        background: var(--gold, #b8934a);
+        color: #fff;
+        box-shadow: 0 6px 18px rgba(184,147,74,0.35);
+        transform: translateY(-2px);
+      }
+
+      .time-box-hour {
+        font-size: 1.15rem;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: 0.02em;
+      }
+
+      .time-box-label {
+        font-size: 0.65rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        opacity: 0.65;
+      }
+
+      .time-box.selected .time-box-label {
+        opacity: 0.85;
+      }
+
+      /* Smooth reveal */
+      #departureTimeLabel {
+        overflow: hidden;
+        transition: opacity 0.25s ease;
+      }
+
+      /* ── Disabled select styling ─────────────────────────────── */
+      .reservation-form select:disabled {
+        opacity: 0.45 !important;
+        cursor: not-allowed !important;
+      }
+      #departureTimeLabel:not([style*="none"]) { opacity: 1; }
+
+      /* ── Footer ──────────────────────────────────────────────── */
+      .site-footer span {
+        font-family: var(--font-display) !important;
+        font-style: normal !important;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+      }
+      .site-footer a {
+        font-family: var(--font-body) !important;
+        font-style: normal !important;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loader" id="loader" aria-label="Chargement du site">
+      <div class="loader-video-frame">
+        <video
+          class="loader-video"
+          src="assets/bus-motion.mp4"
+          autoplay
+          muted
+          loop
+          playsinline
+          poster="assets/costa-via-bus.jpeg"
+        ></video>
+        <div class="loader-fallback costa-logo">
+          <span class="costa-word">COSTA</span>
+          <span class="via-row">
+            <span class="via-line left"></span>
+            <small>VIA</small>
+            <span class="via-line right"></span>
+          </span>
+        </div>
+      </div>
+      <div class="loader-bar" aria-hidden="true"><span></span></div>
+    </div>
+
+    <div class="ride-transition" id="rideTransition" aria-hidden="true">
+      <div class="rt-overlay"></div>
+      <div class="rt-content">
+        <div class="rt-logo costa-logo">
+          <span class="costa-word">COSTA</span>
+          <span class="via-row">
+            <span class="via-line left"></span>
+            <small>VIA</small>
+            <span class="via-line right"></span>
+          </span>
+        </div>
+        <div class="rt-bar-wrap" aria-hidden="true">
+          <span class="rt-bar"></span>
+        </div>
+      </div>
+    </div>
+
+    <header class="site-header" id="top">
+      <a class="brand" href="#top" aria-label="Costa Via — accueil">
+        <span class="brand-logo costa-logo" aria-hidden="true">
+          <span class="costa-word">COSTA</span>
+          <span class="via-row">
+            <span class="via-line left"></span>
+            <small>VIA</small>
+            <span class="via-line right"></span>
+          </span>
+        </span>
+      </a>
+      <nav class="nav-links" aria-label="Navigation principale">
+        <a href="#routes">Lignes</a>
+        <a href="#fleet">Nos cars</a>
+        <a href="#reservation">Réservation</a>
+      </nav>
+      <a class="header-action" href="#reservation">Réserver</a>
+    </header>
+
+    <main>
+      <!-- ── Hero ──────────────────────────────────────────────── -->
+      <section class="hero" aria-labelledby="hero-title">
+        <video
+          class="hero-media"
+          src="assets/bus-motion.mp4"
+          autoplay
+          muted
+          loop
+          playsinline
+          poster="assets/costa-via-bus.jpeg"
+        ></video>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <h1 id="hero-title">Costa Via</h1>
+          <p class="hero-copy">
+            Le voyage le plus confortable entre Kénitra et Nador —
+            réservez votre place en moins d'une minute et voyagez en toute sérénité.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#reservation">Réserver ma place</a>
+            <a class="button secondary" href="#routes">Voir la ligne</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Routes ─────────────────────────────────────────────── -->
+      <section class="section route-section" id="routes" aria-labelledby="routes-title">
+        <div class="section-heading">
+          <p class="eyebrow" id="routesEyebrow">Nos lignes</p>
+          <h2 id="routes-title">Nos lignes disponibles</h2>
+        </div>
+        <!-- Les cartes sont générées dynamiquement par initForm() -->
+        <div class="route-grid" id="routeGrid">
+          <!-- placeholder pendant le chargement -->
+          <div class="route-card-skeleton"></div>
+        </div>
+      </section>
+
+      <!-- ── Fleet ──────────────────────────────────────────────── -->
+      <section class="fleet" id="fleet" aria-labelledby="fleet-title">
+        <div class="fleet-media" data-scroll-video>
+          <video
+            src="assets/bus-motion.mp4"
+            muted
+            loop
+            playsinline
+            poster="assets/costa-via-bus.jpeg"
+          ></video>
+        </div>
+        <div class="fleet-content">
+          <p class="eyebrow">Nos cars Costa Via</p>
+          <h2 id="fleet-title">Chaque kilomètre pensé pour votre confort</h2>
+          <p>
+            Nos cars sont entretenus aux meilleurs standards pour que vous arriviez
+            reposé, pas épuisé. Sièges larges, climatisation, et départ ponctuel —
+            chaque trajet, sans exception.
+          </p>
+          <ul class="feature-list">
+            <li>Liaison directe Kénitra – Nador, sans arrêts inutiles</li>
+            <li>Place confirmée par WhatsApp en quelques minutes</li>
+            <li>Grande soute à bagages pour tous vos effets</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ── Reservation ────────────────────────────────────────── -->
+      <section class="reservation-section" id="reservation" aria-labelledby="reservation-title">
+        <div class="reservation-copy">
+          <p class="eyebrow">En quelques secondes</p>
+          <h2 id="reservation-title">Votre place, confirmée sur WhatsApp</h2>
+          <p>
+            Remplissez vos coordonnées et appuyez sur envoyer. WhatsApp s'ouvre
+            avec votre réservation complète — notre équipe confirme votre place
+            immédiatement.
+          </p>
+        </div>
+
+        <form class="reservation-form" id="reservationForm">
+          <label>
+            Nom complet
+            <input
+              id="customerName"
+              name="customerName"
+              type="text"
+              autocomplete="name"
+              placeholder="Ahmed Benali"
+              required
+            />
+          </label>
+
+          <label>
+            Numéro de téléphone
+            <input
+              id="customerPhone"
+              name="customerPhone"
+              type="tel"
+              autocomplete="tel"
+              placeholder="+212 6 00 00 00 00"
+              required
+            />
+          </label>
+
+          <!-- Départ + Arrivée en deux colonnes -->
+          <div class="form-row">
+            <label>
+              Départ
+              <select id="fromCity" name="fromCity" required>
+                <option value="">Chargement…</option>
+              </select>
+            </label>
+            <label>
+              Arrivée
+              <select id="toCity" name="toCity" required disabled>
+                <option value="">— choisissez d'abord le départ</option>
+              </select>
+            </label>
+          </div>
+
+          <!-- Heure de départ : boîtes cliquables -->
+          <div id="departureTimeLabel" style="display:none">
+            <span class="time-boxes-label">Heure de départ</span>
+            <div class="time-boxes" id="timeBoxes" role="group" aria-label="Heure de départ"></div>
+            <!-- champ caché pour la valeur sélectionnée -->
+            <input type="hidden" id="departureTime" name="departureTime" />
+          </div>
+
+          <div class="form-row">
+            <label>
+              Date de voyage
+              <input id="travelDate" name="travelDate" type="date" required />
+            </label>
+            <label>
+              Passagers
+              <input
+                id="passengers"
+                name="passengers"
+                type="number"
+                min="1"
+                max="80"
+                value="1"
+              />
+            </label>
+          </div>
+
+          <label>
+            Remarques
+            <textarea
+              id="notes"
+              name="notes"
+              rows="4"
+              placeholder="Bagages, demande particulière…"
+            ></textarea>
+          </label>
+
+          <button class="button submit" type="submit">Envoyer la réservation sur WhatsApp</button>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>Costa Via</span>
+      <a href="#reservation">Réservez votre place</a>
+    </footer>
+
+    <!--
+      ╔═══════════════════════════════════════════════════════════════════╗
+      ║  DONNÉES DE SECOURS (fallback si JSONbin est inaccessible)       ║
+      ║  Ces données sont utilisées uniquement hors ligne.               ║
+      ║  La vraie source est JSONbin.io — gérez tout depuis admin.html   ║
+      ╚═══════════════════════════════════════════════════════════════════╝
+    -->
+    <script id="schedules-data" type="application/json">
+    {
+      "cities": [
+        { "id": "Kenitra", "label": "Kénitra" },
+        { "id": "Nador",   "label": "Nador"   }
+      ],
+      "lines": [
+        {
+          "id": "KN",
+          "from": "Kenitra",
+          "to": "Nador",
+          "departures": [
+            { "id": "KN-10", "label": "10 h 00", "heure": "10:00" },
+            { "id": "KN-18", "label": "18 h 00", "heure": "18:00" }
+          ]
+        },
+        {
+          "id": "NK",
+          "from": "Nador",
+          "to": "Kenitra",
+          "departures": [
+            { "id": "NK-09", "label": "09 h 00", "heure": "09:00" },
+            { "id": "NK-17", "label": "17 h 00", "heure": "17:00" }
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <script src="script.js"></script>
+    <script>
+      /* ════════════════════════════════════════════════════════════════
+         Costa Via — logique du formulaire de réservation
+         ════════════════════════════════════════════════════════════════ */
+
+      /* ── Animation patch ───────────────────────────────────────── */
+      (function () {
+        var el = document.getElementById('rideTransition');
+        if (!el) return;
+        var _orig = window.setTimeout;
+        window.setTimeout = function (fn, delay) {
+          var a = Array.prototype.slice.call(arguments, 2);
+          return _orig.apply(this, [fn, delay].concat(a));
+        };
+      })();
+
+      /* ── JSONbin.io — source de vérité, partagée avec admin.html ───── */
+      var JSONBIN_BIN_ID     = '6a464b9fda38895dfe21dfa0';
+      var JSONBIN_MASTER_KEY = '$2a$10$acoaTPgeLpVFCtL/paNJCepuQtPx75NwT.cniJv318Ar5eZn329Nm';
+      var JSONBIN_URL        = 'https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID + '/latest';
+
+      /* ── Chargement des données ─────────────────────────────────────
+       *
+       *  Priorité :
+       *  1. JSONbin.io                          ← source de vérité, gérée depuis admin.html
+       *  2. localStorage['costaViaSchedules']   ← cache (dernier chargement connu)
+       *  3. Bloc <script id="schedules-data">   ← fallback hors ligne, livré avec la page
+       *
+       *  Fonctionne en file://, localhost, et en ligne.
+       * ──────────────────────────────────────────────────────────── */
+      function loadLocalSchedules() {
+        /* 1. localStorage — mis à jour par l'admin / lors d'une visite précédente */
+        try {
+          var saved = localStorage.getItem('costaViaSchedules');
+          if (saved) {
+            var parsed = JSON.parse(saved);
+            if (parsed && parsed.cities && parsed.lines) return parsed;
+          }
+        } catch(e) {}
+
+        /* 2. Fallback : données inline */
+        var tag = document.getElementById('schedules-data');
+        if (!tag) return { cities: [], lines: [] };
+        try { return JSON.parse(tag.textContent); }
+        catch(e) { return { cities: [], lines: [] }; }
+      }
+
+      function fetchSchedulesFromJsonBin() {
+        /* Coupe la requête si JSONbin met trop de temps à répondre,
+           pour ne pas laisser la page de réservation bloquée sur un réseau lent. */
+        var controller = ('AbortController' in window) ? new AbortController() : null;
+        var timer = controller ? setTimeout(function () { controller.abort(); }, 4000) : null;
+
+        return fetch(JSONBIN_URL, {
+          headers: {
+            'X-Master-Key': JSONBIN_MASTER_KEY,
+            'X-Bin-Meta': 'false'
+          },
+          signal: controller ? controller.signal : undefined
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
+          .then(function (data) {
+            if (!data || !data.cities || !data.lines) throw new Error('Format invalide');
+            try { localStorage.setItem('costaViaSchedules', JSON.stringify(data)); } catch(e) {}
+            return data;
+          })
+          .finally(function () { if (timer) clearTimeout(timer); });
+      }
+
+      /* Initialise le formulaire UNE SEULE FOIS, avec la donnée la plus fraîche possible
+         (JSONbin.io en priorité, secours local sinon). On n'appelle jamais initForm()
+         une deuxième fois : elle attache des écouteurs d'évènements, qui se
+         dupliqueraient (double envoi WhatsApp, etc.) si elle était rappelée. */
+      fetchSchedulesFromJsonBin()
+        .catch(function () { return loadLocalSchedules(); })
+        .then(function (data) { initForm(data); });
+
+      /* ── Génération dynamique des cartes de lignes ─────────────── */
+      function renderRouteCards(data, cityLabels) {
+        var grid     = document.getElementById('routeGrid');
+        var title    = document.getElementById('routes-title');
+        var eyebrow  = document.getElementById('routesEyebrow');
+        if (!grid) return;
+
+        /* Vide le skeleton */
+        grid.innerHTML = '';
+
+        if (!data.lines || data.lines.length === 0) {
+          grid.innerHTML = '<p style="color:var(--muted);font-size:14px">Aucune ligne disponible pour le moment.</p>';
+          return;
+        }
+
+        /* Titre dynamique selon le nombre de lignes */
+        var nbLignes = data.lines.length;
+        if (eyebrow) eyebrow.textContent = nbLignes === 1 ? 'Notre ligne' : 'Nos lignes';
+        if (title) {
+          if (nbLignes === 1) {
+            var l = data.lines[0];
+            var fl = cityLabels[l.from] || l.from;
+            var tl = cityLabels[l.to]   || l.to;
+            title.textContent = fl + ' — ' + tl + ', direct';
+          } else {
+            title.textContent = nbLignes + ' lignes disponibles';
+          }
+        }
+
+        /* Grille : une colonne si une seule ligne, auto sinon */
+        grid.className = 'route-grid' + (nbLignes === 1 ? ' single-route' : '');
+
+        /* Crée une carte par ligne */
+        data.lines.forEach(function (line) {
+          var fromLabel = cityLabels[line.from] || line.from;
+          var toLabel   = cityLabels[line.to]   || line.to;
+          var depCount  = line.departures ? line.departures.length : 0;
+
+          /* Horaires à afficher sous la carte */
+          var depsHtml = '';
+          if (line.departures && line.departures.length) {
+            depsHtml = '<span class="route-deps">' +
+              line.departures.map(function (d) {
+                return '<span class="route-dep-pill">🕐 ' + d.label + '</span>';
+              }).join('') +
+            '</span>';
+          }
+
+          var card = document.createElement('button');
+          card.type         = 'button';
+          card.className    = 'route-card is-selected';
+          card.dataset.route = line.from + ' - ' + line.to;
+
+          card.innerHTML =
+            '<span class="route-name">' + fromLabel + ' ↔ ' + toLabel + '</span>' +
+            '<span class="route-meta">Réservez vite — les places partent rapidement</span>' +
+            (depsHtml ? depsHtml : '');
+
+          grid.appendChild(card);
+        });
+
+        /* Rebranche les listeners de clic (définis plus bas dans initForm) */
+        /* On dispatch un event custom pour que initForm les attrape */
+        grid.dispatchEvent(new Event('cards-ready', { bubbles: true }));
+      }
+
+      /* ── initForm ───────────────────────────────────────────────── */
+      function initForm(data) {
+
+        var SCHEDULES    = {};
+        var DESTINATIONS = {};
+        var CITY_LABELS  = {};
+
+        data.cities.forEach(function (c) {
+          CITY_LABELS[c.id] = c.label;
+        });
+
+        data.lines.forEach(function (line) {
+          var f = line.from, t = line.to;
+          if (!SCHEDULES[f])    SCHEDULES[f]    = {};
+          if (!DESTINATIONS[f]) DESTINATIONS[f] = [];
+          SCHEDULES[f][t] = line.departures;
+          DESTINATIONS[f].push({ value: t, label: CITY_LABELS[t] || t });
+        });
+
+        /* ── Génère les cartes de lignes dynamiquement ────────────── */
+        renderRouteCards(data, CITY_LABELS);
+
+        var elFrom      = document.getElementById('fromCity');
+        var elTo        = document.getElementById('toCity');
+        var elTimeHidden= document.getElementById('departureTime');
+        var elTimeBoxes = document.getElementById('timeBoxes');
+        var elTimeLbl   = document.getElementById('departureTimeLabel');
+
+        /* Peuple le select Départ */
+        elFrom.innerHTML = '<option value="">Ville de départ</option>';
+        data.cities.forEach(function (c) {
+          var o = document.createElement('option');
+          o.value = c.id; o.textContent = c.label;
+          elFrom.appendChild(o);
+        });
+
+        elFrom.addEventListener('change', function () {
+          var from = this.value;
+          elTo.innerHTML = '<option value="">Ville d\'arrivée</option>';
+          elTo.disabled  = true;
+          elTimeLbl.style.display = 'none';
+          elTimeBoxes.innerHTML   = '';
+          elTimeHidden.value      = '';
+          if (!from || !DESTINATIONS[from]) return;
+          DESTINATIONS[from].forEach(function (d) {
+            var o = document.createElement('option');
+            o.value = d.value; o.textContent = d.label;
+            elTo.appendChild(o);
+          });
+          elTo.disabled = false;
+          if (DESTINATIONS[from].length === 1) {
+            elTo.value = DESTINATIONS[from][0].value;
+            elTo.dispatchEvent(new Event('change'));
+          }
+        });
+
+        elTo.addEventListener('change', function () {
+          var from = elFrom.value, to = this.value;
+
+          /* Réinitialise les boîtes horaires */
+          elTimeLbl.style.display = 'none';
+          elTimeBoxes.innerHTML   = '';
+          elTimeHidden.value      = '';
+
+          if (!from || !to) return;
+          var slots = SCHEDULES[from] && SCHEDULES[from][to] ? SCHEDULES[from][to] : [];
+          if (!slots.length) return;
+
+          /* Construit les boîtes cliquables */
+          slots.forEach(function (s) {
+            var box = document.createElement('button');
+            box.type      = 'button';
+            box.className = 'time-box';
+            box.dataset.id    = s.id;
+            box.dataset.heure = s.heure;
+            box.dataset.label = s.label;
+
+            /* Formate l'heure : "10:00" → "10h00" affiché en deux lignes */
+            var parts = s.heure.split(':');
+            var hh = parts[0], mm = parts[1] || '00';
+
+            box.innerHTML =
+              '<span class="time-box-hour">' + hh + '<small style="font-size:.65em;font-weight:500">h</small>' + mm + '</span>' +
+              '<span class="time-box-label">Départ</span>';
+
+            box.addEventListener('click', function () {
+              /* Déselectionne tout */
+              elTimeBoxes.querySelectorAll('.time-box').forEach(function (b) {
+                b.classList.remove('selected');
+              });
+              /* Sélectionne ce bouton */
+              box.classList.add('selected');
+              elTimeHidden.value = s.id;
+              /* Stocke le label pour le message WhatsApp */
+              elTimeHidden.dataset.label = s.label;
+            });
+
+            elTimeBoxes.appendChild(box);
+          });
+
+          elTimeLbl.style.display = '';
+        });
+
+        /* ── Clic sur les cartes de lignes (délégation sur le grid) ── */
+        var routeGrid = document.getElementById('routeGrid');
+        if (routeGrid) {
+          routeGrid.addEventListener('click', function (e) {
+            var card = e.target.closest('.route-card');
+            if (!card) return;
+
+            var parts = (card.getAttribute('data-route') || '').split(' - ');
+            var from  = (parts[0] || '').trim();
+
+            /* Animation */
+            var rt = document.getElementById('rideTransition');
+            if (rt) {
+              rt.classList.remove('is-active', 'is-leaving');
+              void rt.offsetWidth;
+              rt.classList.add('is-active');
+              setTimeout(function () {
+                var target = document.getElementById('reservation');
+                if (target) target.scrollIntoView({ behavior: 'instant' });
+              }, 350);
+              setTimeout(function () { rt.classList.add('is-leaving'); }, 680);
+              setTimeout(function () { rt.classList.remove('is-active', 'is-leaving'); }, 1050);
+            }
+
+            /* Pré-sélectionne la ville de départ */
+            if (from && elFrom) {
+              elFrom.value = from;
+              elTimeBoxes.innerHTML = '';
+              elTimeHidden.value    = '';
+              elFrom.dispatchEvent(new Event('change'));
+            }
+          });
+        }
+
+        document.getElementById('reservationForm')
+          .addEventListener('submit', function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            var name    = (document.getElementById('customerName').value  || '').trim();
+            var phone   = (document.getElementById('customerPhone').value || '').trim();
+            var from    = elFrom.value;
+            var to      = elTo.value;
+            var timeId  = elTimeHidden.value;
+            var timeStr = elTimeHidden.dataset.label || timeId || '—';
+            var date    = document.getElementById('travelDate').value;
+            var pax     = document.getElementById('passengers').value || '1';
+            var notes   = (document.getElementById('notes').value || '').trim();
+            var dateStr = date;
+            if (date) {
+              var d = new Date(date + 'T00:00:00');
+              dateStr = d.toLocaleDateString('fr-FR', {
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+              });
+            }
+            var msg = [
+              '🚌 *Réservation Costa Via*', '',
+              '👤 Nom : '             + (name                  || '—'),
+              '📞 Tél : '             + (phone                 || '—'),
+              '📍 Départ : '          + (CITY_LABELS[from]     || from || '—'),
+              '🏁 Arrivée : '         + (CITY_LABELS[to]       || to   || '—'),
+              '🕐 Heure de départ : ' + timeStr,
+              '📅 Date : '            + (dateStr               || '—'),
+              '🧑‍🤝‍🧑 Passagers : '  + pax
+            ];
+            if (notes) msg.push('📝 Remarques : ' + notes);
+            var waNumber = '212600000000';
+            window.open(
+              'https://wa.me/' + waNumber + '?text=' + encodeURIComponent(msg.join('\n')),
+              '_blank'
+            );
+          }, true);
+
+      } /* fin initForm() */
+    </script>
+  </body>
+</html>

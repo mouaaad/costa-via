@@ -1,0 +1,30 @@
+{
+  "_comment": "Base de données des horaires Costa Via. Pour modifier : éditez ce fichier uniquement.",
+  "_structure": "lignes[n].from → ville de départ (clé utilisée dans le code), lignes[n].to → arrivée, lignes[n].departures[n] = { id, label, heure }",
+
+  "cities": [
+    { "id": "Kenitra", "label": "Kénitra" },
+    { "id": "Nador",   "label": "Nador"   }
+  ],
+
+  "lines": [
+    {
+      "id": "KN",
+      "from": "Kenitra",
+      "to": "Nador",
+      "departures": [
+        { "id": "KN-10", "label": "10 h 00", "heure": "10:00" },
+        { "id": "KN-18", "label": "18 h 00", "heure": "18:00" }
+      ]
+    },
+    {
+      "id": "NK",
+      "from": "Nador",
+      "to": "Kenitra",
+      "departures": [
+        { "id": "NK-09", "label": "09 h 00", "heure": "09:00" },
+        { "id": "NK-17", "label": "17 h 00", "heure": "17:00" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Costa Via — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Tokens ───────────────────────────────────────────────────── */
+    :root {
+      --ink:      #111111;
+      --muted:    #6b6b6b;
+      --paper:    #f5f5f3;
+      --surface:  #ffffff;
+      --line:     #e2dfd9;
+      --red:      #c91f2c;
+      --red-bg:   #fdf2f3;
+      --gold:     #b8934a;
+      --gold-bg:  #fdf8f0;
+      --green:    #1a7a4a;
+      --green-bg: #f0faf5;
+      --shadow-sm: 0 2px 8px rgba(17,17,17,0.08);
+      --shadow-md: 0 8px 28px rgba(17,17,17,0.12);
+      --radius:   10px;
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body:    'Inter', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--ink);
+      background: var(--paper);
+      min-height: 100vh;
+    }
+
+    .sync-badge {
+      font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.06em;
+      border-radius: 99px; padding: 3px 10px;
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+    }
+    .badge-local  { background: #f0f0ee; color: var(--muted);  border-color: var(--line); }
+    .badge-saving { background: #fff8e6; color: #8a6500;       border-color: #f0d060; }
+    .badge-ok     { background: var(--green-bg); color: var(--green); border-color: rgba(26,122,74,0.2); }
+    .badge-error  { background: var(--red-bg);   color: var(--red);   border-color: rgba(201,31,44,0.2); }
+
+    /* ── Login screen ─────────────────────────────────────────────── */
+    #loginScreen {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: #0a0a0a;
+      z-index: 100;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    #loginScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    .login-box {
+      background: var(--surface);
+      border-radius: 14px;
+      padding: 48px 44px;
+      width: min(420px, 92vw);
+      box-shadow: 0 32px 80px rgba(0,0,0,0.45);
+    }
+    .login-logo {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .login-logo span { color: var(--red); }
+    .login-sub {
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 36px;
+    }
+    .login-box label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .login-box input {
+      display: block;
+      width: 100%;
+      height: 46px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--ink);
+      background: var(--paper);
+      outline: none;
+      transition: border-color 0.15s;
+      margin-bottom: 18px;
+    }
+    .login-box input:focus { border-color: var(--gold); }
+    .login-error {
+      font-size: 0.78rem;
+      color: var(--red);
+      margin-bottom: 12px;
+      min-height: 18px;
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 7px;
+      height: 44px; padding: 0 20px;
+      border: none; border-radius: 8px;
+      font-family: var(--font-body); font-size: 13px; font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary   { background: var(--ink);   color: #fff; width: 100%; }
+    .btn-gold      { background: var(--gold);  color: #fff; }
+    .btn-red       { background: var(--red);   color: #fff; }
+    .btn-ghost     { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+    .btn-green     { background: var(--green); color: #fff; }
+    .btn-sm        { height: 34px; padding: 0 14px; font-size: 12px; border-radius: 6px; }
+
+    /* ── App shell ────────────────────────────────────────────────── */
+    #app { display: none; min-height: 100vh; }
+    #app.visible { display: flex; flex-direction: column; }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px;
+      height: 62px; padding: 0 clamp(16px, 4vw, 48px);
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      box-shadow: var(--shadow-sm);
+    }
+    .topbar-brand {
+      font-family: var(--font-display);
+      font-size: 1.3rem; font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+    }
+    .topbar-brand span { color: var(--red); }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .badge-admin {
+      font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--gold); background: var(--gold-bg);
+      border: 1px solid rgba(184,147,74,0.25);
+      border-radius: 99px; padding: 3px 10px;
+    }
+
+    /* ── Main layout ──────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      align-items: start;
+    }
+
+    /* ── Sidebar ──────────────────────────────────────────────────── */
+    .sidebar {
+      position: sticky; top: 62px;
+      height: calc(100vh - 62px);
+      overflow-y: auto;
+      padding: 28px 16px;
+      border-right: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .sidebar-section-label {
+      font-size: 0.65rem; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--muted); padding: 0 10px;
+      margin: 0 0 8px;
+    }
+    .sidebar-nav { list-style: none; margin-bottom: 28px; }
+    .sidebar-nav li a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 10px;
+      border-radius: 7px;
+      font-size: 13px; font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      transition: background 0.12s, color 0.12s;
+      cursor: pointer;
+    }
+    .sidebar-nav li a:hover,
+    .sidebar-nav li a.active {
+      background: var(--paper); color: var(--ink);
+    }
+    .sidebar-nav li a.active { font-weight: 600; }
+    .sidebar-icon { width: 16px; text-align: center; }
+
+    /* ── Content ──────────────────────────────────────────────────── */
+    .content { padding: clamp(24px, 4vw, 48px); }
+
+    .page-header {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 16px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    .page-title { font-family: var(--font-display); font-size: 2rem; font-weight: 700; line-height: 1; }
+    .page-desc { color: var(--muted); font-size: 13px; margin-top: 6px; }
+
+    /* ── Tabs ─────────────────────────────────────────────────────── */
+    .tab-panels > .tab-panel { display: none; }
+    .tab-panels > .tab-panel.active { display: block; }
+
+    /* ── Cards / sections ─────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .card-header {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .card-title {
+      font-size: 13px; font-weight: 600;
+      color: var(--ink); letter-spacing: 0.02em;
+    }
+    .card-body { padding: 20px; }
+
+    /* ── Empty state ──────────────────────────────────────────────── */
+    .empty {
+      text-align: center; padding: 40px 20px;
+      color: var(--muted); font-size: 13px;
+    }
+    .empty-icon { font-size: 2rem; margin-bottom: 10px; opacity: 0.4; }
+
+    /* ── Table ────────────────────────────────────────────────────── */
+    .tbl { width: 100%; border-collapse: collapse; }
+    .tbl th {
+      font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); text-align: left;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--paper);
+    }
+    .tbl td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px; color: var(--ink);
+      vertical-align: middle;
+    }
+    .tbl tr:last-child td { border-bottom: none; }
+    .tbl tr:hover td { background: var(--paper); }
+
+    /* ── Tags / chips ─────────────────────────────────────────────── */
+    .chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 99px;
+      font-size: 11px; font-weight: 600;
+      white-space: nowrap;
+    }
+    .chip-gold { background: var(--gold-bg); color: #7a5e1e; border: 1px solid rgba(184,147,74,0.22); }
+    .chip-red  { background: var(--red-bg);  color: #8f111c; border: 1px solid rgba(201,31,44,0.18); }
+    .chip-green{ background: var(--green-bg);color: #145c38; border: 1px solid rgba(26,122,74,0.18); }
+
+    /* ── Inline form row ──────────────────────────────────────────── */
+    .form-inline {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px; align-items: end;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted);
+    }
+    .field input, .field select {
+      height: 40px; padding: 0 12px;
+      border: 1px solid var(--line); border-radius: 7px;
+      font-family: var(--font-body); font-size: 13px;
+      color: var(--ink); background: var(--paper);
+      outline: none; transition: border-color 0.15s;
+    }
+    .field input:focus, .field select:focus { border-color: var(--gold); }
+
+    /* ── Departure pills inside a line row ────────────────────────── */
+    .dep-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .dep-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 99px;
+      background: var(--gold-bg);
+      border: 1px solid rgba(184,147,74,0.25);
+      font-size: 12px; font-weight: 500; color: #7a5e1e;
+    }
+    .dep-pill button {
+      border: none; background: none; cursor: pointer;
+      color: var(--red); font-size: 14px; line-height: 1;
+      padding: 0; width: 14px; height: 14px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+    }
+    .dep-pill button:hover { background: var(--red-bg); }
+
+    /* ── Toast ────────────────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      z-index: 200;
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 20px; border-radius: 10px;
+      background: var(--ink); color: #fff;
+      font-size: 13px; font-weight: 500;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.28);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; }
+    #toast.success { background: var(--green); }
+    #toast.error   { background: var(--red); }
+
+    /* ── Export panel ─────────────────────────────────────────────── */
+    .export-box {
+      background: #0a0a0a; border-radius: 8px;
+      padding: 18px; overflow: auto; max-height: 420px;
+    }
+    .export-box pre {
+      color: #c8e6c9; font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 11.5px; line-height: 1.6;
+      white-space: pre; tab-size: 2;
+    }
+    .export-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+
+    /* ── Divider ──────────────────────────────────────────────────── */
+    .divider { border: none; border-top: 1px solid var(--line); margin: 24px 0; }
+
+    /* ── Responsive ───────────────────────────────────────────────── */
+    @media (max-width: 780px) {
+      .main { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     LOGIN
+══════════════════════════════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo"><span>COSTA</span> VIA</div>
+    <div class="login-sub">Administration</div>
+
+    <label for="loginUser">Identifiant</label>
+    <input id="loginUser" type="text" placeholder="admin" autocomplete="username" />
+
+    <label for="loginPass">Mot de passe</label>
+    <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password" />
+
+    <div class="login-error" id="loginError"></div>
+    <button class="btn btn-primary" id="loginBtn">Se connecter</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     APP
+══════════════════════════════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar-brand"><span>COSTA</span> VIA</div>
+    <div class="topbar-right">
+      <span id="syncBadge" class="sync-badge badge-saving">🔄 Connexion à JSONbin...</span>
+      <span class="badge-admin">Admin</span>
+      <button class="btn btn-ghost btn-sm" id="logoutBtn">Déconnexion</button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <p class="sidebar-section-label">Navigation</p>
+      <ul class="sidebar-nav">
+        <li><a class="active" data-tab="lines">
+          <span class="sidebar-icon">🗺</span> Lignes & Horaires
+        </a></li>
+        <li><a data-tab="cities">
+          <span class="sidebar-icon">📍</span> Villes
+        </a></li>
+        <li><a data-tab="export">
+          <span class="sidebar-icon">📤</span> Exporter
+        </a></li>
+      </ul>
+      <p class="sidebar-section-label">Accès rapide</p>
+      <ul class="sidebar-nav">
+        <li><a href="index.html" target="_blank">
+          <span class="sidebar-icon">↗</span> Voir le site
+        </a></li>
+      </ul>
+    </aside>
+
+    <!-- Content -->
+    <div class="content">
+
+      <div class="tab-panels">
+
+        <!-- ── TAB : Lignes & Horaires ────────────────────────────── -->
+        <div class="tab-panel active" id="tab-lines">
+
+          <div class="page-header">
+            <div>
+              <div class="page-title">Lignes & Horaires</div>
+              <div class="page-desc">Gérez les lignes de bus et leurs horaires de départ.</div>
+            </div>
+          </div>
+
+          <!-- Ajouter une ligne -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Ajouter une nouvelle ligne</span>
+            </div>
+            <div class="card-body">
+              <div class="form-inline" id="addLineForm">
+                <div class="field">
+                  <label>Départ</label>
+                  <select id="newLineFrom">
+                    <option value="">— ville de départ</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Arrivée</label>
+                  <select id="newLineTo">
+                    <option value="">— ville d'arrivée</option>
+                  </select>
+                </div>
+                <div style="display:flex;align-items:flex-end">
+                  <button class="btn btn-gold" id="addLineBtn">+ Créer la ligne</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Liste des lignes -->
+          <div id="linesContainer"></div>
+
+        </div>
+
+        <!-- ── TAB : Villes ────────────────────────────────────────── -->
+        <div class="tab-panel" id="tab-cities">
+
+          <div class="page-header">
+            <div>
+              <div class="page-title">Villes</div>
+              <div class="page-desc">Gérez les villes disponibles dans le formulaire de réservation.</div>
+            </div>
+          </div>
+
+          <!-- Ajouter une ville -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Ajouter une ville</span>
+            </div>
+            <div class="card-body">
+              <div class="form-inline">
+                <div class="field">
+                  <label>Identifiant <small style="text-transform:none;letter-spacing:0">(sans accents, ex: Casablanca)</small></label>
+                  <input id="newCityId" type="text" placeholder="Casablanca" />
+                </div>
+                <div class="field">
+                  <label>Nom affiché</label>
+                  <input id="newCityLabel" type="text" placeholder="Casablanca" />
+                </div>
+                <div style="display:flex;align-items:flex-end">
+                  <button class="btn btn-gold" id="addCityBtn">+ Ajouter</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Liste des villes -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Villes enregistrées</span>
+            </div>
+            <div id="citiesTableWrap">
+              <div class="empty"><div class="empty-icon">📍</div>Aucune ville</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── TAB : Exporter ──────────────────────────────────────── -->
+        <div class="tab-panel" id="tab-export">
+
+          <div class="page-header">
+            <div>
+              <div class="page-title">Exporter</div>
+              <div class="page-desc">Copiez le JSON généré et collez-le dans le bloc <code style="background:var(--paper);padding:2px 6px;border-radius:4px;font-size:12px">&lt;script id="schedules-data"&gt;</code> de index.html.</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">📤 JSON des horaires</span>
+              <button class="btn btn-ghost btn-sm" id="refreshExportBtn">↺ Rafraîchir</button>
+            </div>
+            <div class="card-body">
+              <div class="export-box">
+                <pre id="exportPre"></pre>
+              </div>
+              <div class="export-actions">
+                <button class="btn btn-green" id="copyJsonBtn">📋 Copier le JSON</button>
+                <button class="btn btn-gold"  id="downloadJsonBtn">⬇ Télécharger schedules.json</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">ℹ️ Comment ça fonctionne</span>
+            </div>
+            <div class="card-body" style="line-height:1.8;color:var(--muted);font-size:13px">
+              <ol style="padding-left:18px;display:grid;gap:10px">
+                <li>Chaque modification dans l'admin est <strong style="color:var(--green)">sauvegardée instantanément</strong> dans le stockage du navigateur.</li>
+                <li>Quand un visiteur ouvre <code style="background:var(--paper);padding:1px 5px;border-radius:3px">index.html</code>, le site lit automatiquement ces données.</li>
+                <li>⚠️ <strong style="color:var(--ink)">Les deux fichiers doivent être ouverts dans le même navigateur</strong> sur le même ordinateur.</li>
+                <li>Pour déployer sur un autre PC ou en ligne, utilisez le bouton <strong style="color:var(--ink)">Télécharger JSON</strong> et intégrez-le dans <code style="background:var(--paper);padding:1px 5px;border-radius:3px">index.html</code>.</li>
+              </ol>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════
+   CONFIGURATION — MODIFIEZ CES VALEURS
+   ════════════════════════════════════════════════════════════════════ */
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'costaVia2025!';   /* ← changez ce mot de passe */
+
+/* JSONbin.io — source de vérité partagée avec index.html */
+const JSONBIN_BIN_ID     = '6a464b9fda38895dfe21dfa0';
+const JSONBIN_MASTER_KEY = '$2a$10$acoaTPgeLpVFCtL/paNJCepuQtPx75NwT.cniJv318Ar5eZn329Nm';
+const JSONBIN_URL        = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+/* ══════════════════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════════════════
+   CLÉ localStorage PARTAGÉE AVEC index.html
+   Les deux fichiers lisent/écrivent la même clé.
+   ════════════════════════════════════════════════════════════════════ */
+const LS_KEY = 'costaViaSchedules';
+
+/* ════════════════════════════════════════════════════════════════════
+   ÉTAT
+   ════════════════════════════════════════════════════════════════════ */
+let DB = defaultDB(); /* remplacé par les vraies données au chargement, dans unlock() */
+
+/* Charge les données. Priorité :
+   1. JSONbin.io          — source de vérité, partagée avec index.html
+   2. Cache localStorage  — secours hors-ligne
+   3. Valeurs par défaut  — dernier recours */
+async function loadDB() {
+  try {
+    const res = await fetch(`${JSONBIN_URL}/latest`, {
+      headers: {
+        'X-Master-Key': JSONBIN_MASTER_KEY,
+        'X-Bin-Meta': 'false'
+      }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.cities && data.lines) {
+        localStorage.setItem(LS_KEY, JSON.stringify(data));
+        return data;
+      }
+    }
+  } catch (e) { /* JSONbin inaccessible → on retombe sur le cache local */ }
+
+  try {
+    const saved = localStorage.getItem(LS_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.cities && parsed.lines) return parsed;
+    }
+  } catch(e) {}
+  return defaultDB();
+}
+
+function defaultDB() {
+  return {
+    cities: [
+      { id: 'Kenitra', label: 'Kénitra' },
+      { id: 'Nador',   label: 'Nador'   }
+    ],
+    lines: [
+      {
+        id: 'KN', from: 'Kenitra', to: 'Nador',
+        departures: [
+          { id: 'KN-10', label: '10 h 00', heure: '10:00' },
+          { id: 'KN-18', label: '18 h 00', heure: '18:00' }
+        ]
+      },
+      {
+        id: 'NK', from: 'Nador', to: 'Kenitra',
+        departures: [
+          { id: 'NK-09', label: '09 h 00', heure: '09:00' },
+          { id: 'NK-17', label: '17 h 00', heure: '17:00' }
+        ]
+      }
+    ]
+  };
+}
+
+/* Sauvegarde instantanée dans localStorage (secours + aperçu immédiat dans ce navigateur),
+   puis synchronisation avec JSONbin.io → visible par TOUS les visiteurs d'index.html. */
+async function saveDB() {
+  localStorage.setItem(LS_KEY, JSON.stringify(DB));
+
+  showSyncBadge('saving');
+  try {
+    const res = await fetch(JSONBIN_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': JSONBIN_MASTER_KEY
+      },
+      body: JSON.stringify(DB)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    showSyncBadge('ok');
+  } catch (e) {
+    showSyncBadge('error');
+  }
+}
+
+/* ── Badge de synchronisation ─────────────────────────────────────── */
+function showSyncBadge(state) {
+  const badge = document.getElementById('syncBadge');
+  const map = {
+    saving: { text: '⏳ Enregistrement...',                    cls: 'badge-saving' },
+    ok:     { text: '✅ Site mis à jour',                      cls: 'badge-ok'     },
+    error:  { text: '⚠️ Hors ligne — sauvegardé en local seul', cls: 'badge-error'  }
+  };
+  const s = map[state] || map.ok;
+  badge.textContent = s.text;
+  badge.className   = 'sync-badge ' + s.cls;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   LOGIN
+   ════════════════════════════════════════════════════════════════════ */
+const loginScreen = document.getElementById('loginScreen');
+const app         = document.getElementById('app');
+const loginError  = document.getElementById('loginError');
+
+/* Check session */
+if (sessionStorage.getItem('cvAdmin') === '1') unlock();
+
+document.getElementById('loginBtn').addEventListener('click', tryLogin);
+document.getElementById('loginPass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') tryLogin();
+});
+
+function tryLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    sessionStorage.setItem('cvAdmin', '1');
+    loginError.textContent = '';
+    unlock();
+  } else {
+    loginError.textContent = 'Identifiant ou mot de passe incorrect.';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
+}
+
+async function unlock() {
+  /* Charge les données depuis JSONbin.io (avec repli sur le cache local) */
+  DB = await loadDB();
+  showSyncBadge('ok');
+  loginScreen.classList.add('hidden');
+  app.classList.add('visible');
+  renderAll();
+}
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem('cvAdmin');
+  loginScreen.classList.remove('hidden');
+  app.classList.remove('visible');
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+});
+
+/* ════════════════════════════════════════════════════════════════════
+   NAVIGATION TABS
+   ════════════════════════════════════════════════════════════════════ */
+document.querySelectorAll('.sidebar-nav [data-tab]').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const tab = link.dataset.tab;
+    document.querySelectorAll('.sidebar-nav [data-tab]').forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    if (tab === 'export') renderExport();
+  });
+});
+
+/* ════════════════════════════════════════════════════════════════════
+   RENDER ALL
+   ════════════════════════════════════════════════════════════════════ */
+function renderAll() {
+  renderCitySelects();
+  renderCitiesTable();
+  renderLines();
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   CITIES
+   ════════════════════════════════════════════════════════════════════ */
+function renderCitySelects() {
+  ['newLineFrom','newLineTo'].forEach(id => {
+    const sel = document.getElementById(id);
+    const val = sel.value;
+    sel.innerHTML = '<option value="">— ville</option>';
+    DB.cities.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c.id; o.textContent = c.label;
+      sel.appendChild(o);
+    });
+    sel.value = val;
+  });
+}
+
+function renderCitiesTable() {
+  const wrap = document.getElementById('citiesTableWrap');
+  if (!DB.cities.length) {
+    wrap.innerHTML = '<div class="empty"><div class="empty-icon">📍</div>Aucune ville enregistrée.</div>';
+    return;
+  }
+  wrap.innerHTML = `
+    <table class="tbl">
+      <thead><tr>
+        <th>ID</th><th>Nom affiché</th><th>Utilisée dans</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${DB.cities.map(c => {
+          const usedIn = DB.lines.filter(l => l.from === c.id || l.to === c.id).length;
+          return `<tr>
+            <td><code style="font-size:12px;background:var(--paper);padding:2px 6px;border-radius:4px">${c.id}</code></td>
+            <td>${c.label}</td>
+            <td>${usedIn ? `<span class="chip chip-gold">${usedIn} ligne${usedIn>1?'s':''}</span>` : '<span class="chip chip-red">Aucune</span>'}</td>
+            <td style="text-align:right">
+              <button class="btn btn-ghost btn-sm" onclick="deleteCity('${c.id}')"
+                ${usedIn ? 'disabled title="Retirez d\'abord les lignes qui utilisent cette ville"' : ''}>
+                Supprimer
+              </button>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+document.getElementById('addCityBtn').addEventListener('click', () => {
+  const idEl    = document.getElementById('newCityId');
+  const labelEl = document.getElementById('newCityLabel');
+  const id      = idEl.value.trim().replace(/\s+/g, '');
+  const label   = labelEl.value.trim();
+  if (!id || !label) { toast('Remplissez les deux champs.', 'error'); return; }
+  if (DB.cities.find(c => c.id.toLowerCase() === id.toLowerCase())) {
+    toast('Cette ville existe déjà.', 'error'); return;
+  }
+  DB.cities.push({ id, label });
+  saveDB();
+  idEl.value = ''; labelEl.value = '';
+  renderAll();
+  toast(`Ville "${label}" ajoutée.`, 'success');
+});
+
+function deleteCity(id) {
+  if (!confirm(`Supprimer la ville "${id}" ?`)) return;
+  DB.cities = DB.cities.filter(c => c.id !== id);
+  saveDB();
+  renderAll();
+  toast('Ville supprimée.', 'success');
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   LINES
+   ════════════════════════════════════════════════════════════════════ */
+function renderLines() {
+  const container = document.getElementById('linesContainer');
+  if (!DB.lines.length) {
+    container.innerHTML = '<div class="card"><div class="empty"><div class="empty-icon">🗺</div>Aucune ligne créée.</div></div>';
+    return;
+  }
+  container.innerHTML = DB.lines.map((line, li) => {
+    const fromCity = DB.cities.find(c => c.id === line.from);
+    const toCity   = DB.cities.find(c => c.id === line.to);
+    const fromLabel = fromCity ? fromCity.label : line.from;
+    const toLabel   = toCity   ? toCity.label   : line.to;
+    return `
+      <div class="card" id="line-card-${li}">
+        <div class="card-header">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="chip chip-gold">${line.id}</span>
+            <strong style="font-size:14px">${fromLabel} → ${toLabel}</strong>
+            <span class="chip chip-green">${line.departures.length} départ${line.departures.length!==1?'s':''}</span>
+          </div>
+          <button class="btn btn-red btn-sm" onclick="deleteLine(${li})">Supprimer la ligne</button>
+        </div>
+        <div class="card-body">
+
+          <!-- Horaires existants -->
+          <div style="margin-bottom:16px">
+            <div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Horaires de départ</div>
+            <div class="dep-list" id="deps-${li}">
+              ${line.departures.length
+                ? line.departures.map((d, di) =>
+                    `<span class="dep-pill">
+                      <span>🕐 ${d.label}</span>
+                      <button title="Supprimer" onclick="removeDeparture(${li},${di})">×</button>
+                    </span>`
+                  ).join('')
+                : '<span style="color:var(--muted);font-size:12px">Aucun horaire — ajoutez-en un ci-dessous.</span>'
+              }
+            </div>
+          </div>
+
+          <hr class="divider" style="margin:16px 0">
+
+          <!-- Ajouter un horaire -->
+          <div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Ajouter un horaire</div>
+            <div class="form-inline">
+              <div class="field">
+                <label>Heure</label>
+                <input type="time" id="dep-time-${li}" step="60" />
+              </div>
+              <div style="display:flex;align-items:flex-end">
+                <button class="btn btn-gold btn-sm" onclick="addDeparture(${li})">+ Ajouter</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* Ajouter une ligne */
+document.getElementById('addLineBtn').addEventListener('click', () => {
+  const from = document.getElementById('newLineFrom').value;
+  const to   = document.getElementById('newLineTo').value;
+  if (!from || !to)    { toast('Sélectionnez départ et arrivée.', 'error'); return; }
+  if (from === to)     { toast('Départ et arrivée doivent être différents.', 'error'); return; }
+  if (DB.lines.find(l => l.from === from && l.to === to)) {
+    toast('Cette ligne existe déjà.', 'error'); return;
+  }
+  const id = (from.substring(0,2) + to.substring(0,2)).toUpperCase();
+  const uniqueId = DB.lines.find(l => l.id === id)
+    ? id + DB.lines.length
+    : id;
+  DB.lines.push({ id: uniqueId, from, to, departures: [] });
+  saveDB();
+  document.getElementById('newLineFrom').value = '';
+  document.getElementById('newLineTo').value   = '';
+  renderLines();
+  toast('Ligne créée.', 'success');
+});
+
+/* Supprimer une ligne */
+function deleteLine(index) {
+  const line = DB.lines[index];
+  if (!confirm(`Supprimer la ligne "${line.from} → ${line.to}" et tous ses horaires ?`)) return;
+  DB.lines.splice(index, 1);
+  saveDB();
+  renderLines();
+  toast('Ligne supprimée.', 'success');
+}
+
+/* Ajouter un horaire */
+function addDeparture(lineIndex) {
+  const input = document.getElementById(`dep-time-${lineIndex}`);
+  const heure = input.value;   /* "HH:MM" */
+  if (!heure) { toast('Sélectionnez une heure.', 'error'); return; }
+
+  const line = DB.lines[lineIndex];
+
+  /* Vérifie les doublons */
+  if (line.departures.find(d => d.heure === heure)) {
+    toast('Cet horaire existe déjà sur cette ligne.', 'error'); return;
+  }
+
+  /* Construit le label "10 h 00" */
+  const [h, m] = heure.split(':');
+  const label  = `${h} h ${m}`;
+
+  /* Construit un ID unique : prefix ligne + heure sans ":" */
+  const depId  = line.id + '-' + h + (m !== '00' ? m : '');
+
+  line.departures.push({ id: depId, label, heure });
+
+  /* Trie les départs par ordre chronologique */
+  line.departures.sort((a, b) => a.heure.localeCompare(b.heure));
+
+  saveDB();
+  input.value = '';
+  renderLines();
+  toast(`Départ ${label} ajouté.`, 'success');
+}
+
+/* Supprimer un horaire */
+function removeDeparture(lineIndex, depIndex) {
+  const dep = DB.lines[lineIndex].departures[depIndex];
+  if (!confirm(`Supprimer le départ "${dep.label}" ?`)) return;
+  DB.lines[lineIndex].departures.splice(depIndex, 1);
+  saveDB();
+  renderLines();
+  toast('Horaire supprimé.', 'success');
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   EXPORT
+   ════════════════════════════════════════════════════════════════════ */
+function renderExport() {
+  const json = JSON.stringify(DB, null, 2);
+  document.getElementById('exportPre').textContent = json;
+}
+
+document.getElementById('refreshExportBtn').addEventListener('click', renderExport);
+
+document.getElementById('copyJsonBtn').addEventListener('click', () => {
+  const json = JSON.stringify(DB, null, 2);
+  navigator.clipboard.writeText(json)
+    .then(() => toast('JSON copié dans le presse-papier !', 'success'))
+    .catch(() => toast('Échec de la copie. Sélectionnez le texte manuellement.', 'error'));
+});
+
+document.getElementById('downloadJsonBtn').addEventListener('click', () => {
+  const json = JSON.stringify(DB, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'schedules.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Téléchargement lancé.', 'success');
+});
+
+/* ════════════════════════════════════════════════════════════════════
+   TOAST
+   ════════════════════════════════════════════════════════════════════ */
+let toastTimer;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ''; }, 2800);
+}
+</script>
+</body>
+</html>

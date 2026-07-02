@@ -1,0 +1,731 @@
+:root {
+  color-scheme: light;
+  --ink: #111111;
+  --muted: #5c5c5c;
+  --paper: #f5f5f3;
+  --surface: #ffffff;
+  --line: #dedbd5;
+  --red: #c91f2c;
+  --red-dark: #8f111c;
+  --gold: #be8d2d;
+  --black: #111111;
+  --shadow: 0 24px 70px rgba(17, 17, 17, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+body.loading {
+  overflow: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  gap: 22px;
+  padding: 24px;
+  background: var(--black);
+  color: #fff;
+  transition:
+    opacity 450ms ease,
+    visibility 450ms ease;
+}
+
+.loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-video-frame {
+  position: relative;
+  width: min(720px, 92vw);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--black) url("assets/costa-via-bus.jpeg") center / contain no-repeat;
+  box-shadow: var(--shadow);
+}
+
+.loader-video,
+.loader-video-frame video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.loader-fallback {
+  position: absolute;
+  inset: auto 24px 22px;
+  font-size: clamp(2.4rem, 7vw, 5.8rem);
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.5);
+}
+
+.costa-logo {
+  display: inline-grid;
+  justify-items: center;
+  gap: 2px;
+  line-height: 0.9;
+  transform: skewX(-8deg);
+}
+
+.costa-word {
+  color: var(--red);
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-size: 1em;
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  -webkit-text-stroke: 1px #fff;
+  text-shadow:
+    0 1px 0 #fff,
+    0 2px 8px rgba(0, 0, 0, 0.26);
+}
+
+.via-row {
+  display: grid;
+  grid-template-columns: minmax(22px, 1fr) auto minmax(22px, 1fr);
+  align-items: center;
+  gap: 7px;
+  width: 84%;
+  color: var(--gold);
+}
+
+.via-row small {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.34em;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.via-line {
+  display: block;
+  height: 6px;
+  background: var(--gold);
+}
+
+.via-line.left {
+  clip-path: polygon(0 50%, 100% 0, 100% 100%);
+}
+
+.via-line.right {
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+.loader-bar {
+  width: min(360px, 70vw);
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.loader-bar span {
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--gold);
+  animation: loadMove 1.1s ease-in-out infinite;
+}
+
+@keyframes loadMove {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(260%);
+  }
+}
+
+/* ── Élégante transition de navigation ───────────────────────────── */
+
+.ride-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  visibility: hidden;
+}
+
+/* Couche sombre qui entre et sort */
+.rt-overlay {
+  position: absolute;
+  inset: 0;
+  background: #0a0a0a;
+  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: bottom;
+}
+
+/* Contenu centré : logo + barre */
+.rt-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  opacity: 0;
+}
+
+/* Logo réutilise .costa-logo mais redimensionné */
+.rt-logo {
+  color: #fff;
+  font-size: clamp(2.6rem, 6vw, 4.8rem);
+}
+
+.rt-logo .costa-word {
+  -webkit-text-stroke: 0.5px rgba(255,255,255,0.3);
+  text-shadow: none;
+}
+
+.rt-logo .via-line {
+  height: 2px;
+  background: #b8934a;
+}
+
+/* Barre de progression */
+.rt-bar-wrap {
+  width: clamp(120px, 22vw, 280px);
+  height: 1px;
+  background: rgba(255,255,255,0.12);
+  overflow: hidden;
+  border-radius: 999px;
+}
+
+.rt-bar {
+  display: block;
+  width: 0%;
+  height: 100%;
+  background: #b8934a;
+  border-radius: 999px;
+}
+
+/* ── États animés ────────────────────────────────────────────── */
+
+.ride-transition.is-active {
+  visibility: visible;
+  pointer-events: all;
+}
+
+/* Phase 1 — entrée : voile monte (0 → 150ms), contenu apparaît (120 → 320ms) */
+.ride-transition.is-active .rt-overlay {
+  animation: rt-overlay-in 0.28s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
+.ride-transition.is-active .rt-content {
+  animation: rt-content-in 0.22s ease forwards 0.14s;
+}
+
+.ride-transition.is-active .rt-bar {
+  animation: rt-bar-fill 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards 0.18s;
+}
+
+/* Phase 2 — sortie : contenu disparaît, voile redescend */
+.ride-transition.is-leaving .rt-content {
+  animation: rt-content-out 0.16s ease forwards;
+}
+
+.ride-transition.is-leaving .rt-overlay {
+  animation: rt-overlay-out 0.32s cubic-bezier(0.76, 0, 0.24, 1) forwards 0.1s;
+}
+
+/* Keyframes */
+@keyframes rt-overlay-in {
+  from { opacity: 0; transform: scaleY(0); }
+  to   { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes rt-overlay-out {
+  from { opacity: 1; transform: scaleY(1); transform-origin: top; }
+  to   { opacity: 0; transform: scaleY(0); transform-origin: top; }
+}
+
+@keyframes rt-content-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes rt-content-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes rt-bar-fill {
+  from { width: 0%;    }
+  to   { width: 100%;  }
+}
+
+
+.site-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 72px;
+  padding: 14px clamp(18px, 4vw, 56px);
+  color: #fff;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.58), rgba(0, 0, 0, 0));
+}
+
+.site-header.scrolled {
+  color: var(--ink);
+  background: rgba(245, 245, 243, 0.94);
+  border-bottom: 1px solid rgba(17, 17, 17, 0.12);
+  backdrop-filter: blur(14px);
+}
+
+.brand,
+.nav-links,
+.header-action {
+  display: flex;
+  align-items: center;
+}
+
+.brand {
+  gap: 10px;
+  font-weight: 800;
+  min-width: max-content;
+}
+
+.brand-logo {
+  width: 94px;
+  min-height: 46px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: #fff;
+  color: var(--red);
+  font-size: 1.34rem;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+}
+
+.brand-logo .costa-word {
+  -webkit-text-stroke-width: 0.35px;
+  text-shadow: none;
+}
+
+.brand-logo .via-row small {
+  font-size: 0.64rem;
+}
+
+.brand-logo .via-line {
+  height: 3px;
+}
+
+.nav-links {
+  gap: clamp(14px, 3vw, 34px);
+  color: inherit;
+  font-weight: 650;
+}
+
+.header-action {
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 8px;
+  background: var(--gold);
+  color: var(--black);
+  font-weight: 800;
+}
+
+.hero {
+  position: relative;
+  min-height: 92svh;
+  display: grid;
+  align-items: end;
+  overflow: hidden;
+  padding: 128px clamp(20px, 6vw, 86px) 76px;
+  color: #fff;
+}
+
+.hero-media,
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-media {
+  object-fit: contain;
+  object-position: center;
+  background: var(--black) url("assets/costa-via-bus.jpeg") center / contain no-repeat;
+}
+
+.hero-overlay {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.34) 34%, rgba(0, 0, 0, 0) 66%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.34), transparent 42%);
+}
+
+.hero-content {
+  position: relative;
+  width: min(780px, 100%);
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--gold);
+  font-size: 0.8rem;
+  font-weight: 850;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 18px;
+  font-size: clamp(3rem, 8vw, 6.8rem);
+  line-height: 0.94;
+}
+
+h2 {
+  margin-bottom: 14px;
+  font-size: clamp(2rem, 4vw, 3.8rem);
+  line-height: 1;
+}
+
+.hero-copy {
+  width: min(620px, 100%);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: clamp(1.04rem, 2vw, 1.3rem);
+  line-height: 1.65;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 850;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.primary,
+.submit {
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 16px 36px rgba(201, 31, 44, 0.34);
+}
+
+.primary:hover,
+.submit:hover {
+  background: var(--red-dark);
+}
+
+.secondary {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.section,
+.reservation-section {
+  padding: clamp(68px, 8vw, 120px) clamp(20px, 6vw, 86px);
+}
+
+.section-heading {
+  width: min(760px, 100%);
+  margin-bottom: 30px;
+}
+
+.route-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.route-grid.single-route {
+  grid-template-columns: minmax(280px, 520px);
+}
+
+.route-card {
+  min-height: 170px;
+  padding: 22px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(17, 17, 17, 0.08);
+}
+
+.route-card:hover,
+.route-card.is-selected {
+  border-color: var(--red);
+  outline: 3px solid rgba(201, 31, 44, 0.1);
+}
+
+.route-name,
+.route-meta {
+  display: block;
+}
+
+.route-name {
+  margin-bottom: 12px;
+  font-size: 1.25rem;
+  font-weight: 850;
+  line-height: 1.12;
+}
+
+.route-meta {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.fleet {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  align-items: center;
+  gap: clamp(28px, 5vw, 70px);
+  padding: clamp(72px, 9vw, 130px) clamp(20px, 6vw, 86px);
+  background: var(--black);
+  color: #fff;
+}
+
+.fleet-media {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--black) url("assets/costa-via-bus.jpeg") center / contain no-repeat;
+  box-shadow: var(--shadow);
+}
+
+.fleet-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.fleet-content p {
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.7;
+}
+
+.feature-list {
+  display: grid;
+  gap: 12px;
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feature-list li {
+  padding: 14px 16px;
+  border-left: 4px solid var(--gold);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+}
+
+.reservation-section {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(320px, 1.2fr);
+  gap: clamp(28px, 5vw, 70px);
+  align-items: start;
+}
+
+.reservation-copy {
+  position: sticky;
+  top: 100px;
+}
+
+.reservation-copy p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.reservation-form {
+  display: grid;
+  gap: 18px;
+  padding: clamp(22px, 4vw, 38px);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.reservation-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.reservation-form input,
+.reservation-form select,
+.reservation-form textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid #c8c8c8;
+  border-radius: 6px;
+  color: var(--ink);
+  background: #fff;
+}
+
+.reservation-form textarea {
+  resize: vertical;
+}
+
+.reservation-form input:focus,
+.reservation-form select:focus,
+.reservation-form textarea:focus {
+  outline: 3px solid rgba(201, 31, 44, 0.16);
+  border-color: var(--red);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 0.55fr;
+  gap: 14px;
+}
+
+.submit {
+  width: 100%;
+  min-height: 54px;
+  font-size: 1.02rem;
+}
+
+.site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 28px clamp(20px, 6vw, 86px);
+  background: var(--black);
+  color: #fff;
+}
+
+.site-footer span {
+  font-weight: 850;
+}
+
+.site-footer a {
+  color: var(--gold);
+  font-weight: 800;
+}
+
+@media (max-width: 920px) {
+  .nav-links {
+    display: none;
+  }
+
+  .route-grid,
+  .fleet,
+  .reservation-section {
+    grid-template-columns: 1fr;
+  }
+
+  .reservation-copy {
+    position: static;
+  }
+}
+
+@media (max-width: 620px) {
+  .site-header {
+    min-height: 64px;
+    padding-inline: 14px;
+  }
+
+  .header-action {
+    min-height: 38px;
+    padding-inline: 12px;
+  }
+
+  .hero {
+    min-height: 88svh;
+    padding: 108px 18px 52px;
+  }
+
+  .hero-actions,
+  .button {
+    width: 100%;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .site-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}
